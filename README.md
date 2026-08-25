@@ -15,11 +15,11 @@ records, or production credentials.
 ## Development
 
 ```bash
-uv sync --all-groups
-uv run ruff format --check .
-uv run ruff check .
-uv run mypy
-uv run pytest
+uv sync --all-groups --no-editable
+uv run --no-sync ruff format --check .
+uv run --no-sync ruff check .
+uv run --no-sync mypy
+uv run --no-sync pytest
 ```
 
 The scenario corpus, evaluators, reviewed-case memory, calibration gates, review workflow, replay
