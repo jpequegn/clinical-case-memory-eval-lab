@@ -36,7 +36,7 @@ testpaths = ["tests"]
 [tool.coverage.run]
 branch = true
 source = ["case_memory_eval"]
-omit = ["src/case_memory_eval/__main__.py"]
+omit = ["*/case_memory_eval/__main__.py"]
 
 [tool.coverage.report]
 fail_under = 80
