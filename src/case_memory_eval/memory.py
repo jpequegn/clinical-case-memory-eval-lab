@@ -10,7 +10,7 @@ from typing import Literal, Protocol
 import duckdb
 from pydantic import Field
 
-from case_memory_eval.canonical import canonical_json
+from case_memory_eval.canonical import canonical_json, content_id
 from case_memory_eval.contracts import ClinicalCase, FailureLabel, ScenarioFamily, StrictModel
 
 Split = Literal["train", "validation", "holdout"]
@@ -144,6 +144,20 @@ class ReviewedCaseMemory:
                 canonical_json(embedding),
                 self.embedder.name,
             ],
+        )
+
+    def snapshot_id(self) -> str:
+        rows = self.connection.execute(
+            """
+            SELECT case_id, split, intervention, promoted, embedding_provider
+            FROM reviewed_cases ORDER BY case_id
+            """
+        ).fetchall()
+        return content_id(
+            {
+                "embedding_provider": self.embedder.name,
+                "records": [list(row) for row in rows],
+            }
         )
 
     def retrieve(
