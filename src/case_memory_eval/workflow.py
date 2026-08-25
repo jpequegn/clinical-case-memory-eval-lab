@@ -149,15 +149,20 @@ class WorkflowStore:
             ORDER BY v.created_at, v.result_id
             """
         ).fetchall()
-        return [
-            {
-                "result_id": result_id,
-                "case_id": case_id,
-                "case": json.loads(case_json),
-                "verdict": json.loads(result_json),
-            }
-            for result_id, case_id, case_json, result_json in rows
-        ]
+        queue = []
+        for result_id, case_id, case_json, result_json in rows:
+            case = ClinicalCase.model_validate_json(case_json)
+            precedents = self.memory.retrieve(case, top_k=3).precedents
+            queue.append(
+                {
+                    "result_id": result_id,
+                    "case_id": case_id,
+                    "case": case.model_dump(mode="json"),
+                    "verdict": json.loads(result_json),
+                    "precedents": [item.model_dump(mode="json") for item in precedents],
+                }
+            )
+        return queue
 
     def decide(
         self,

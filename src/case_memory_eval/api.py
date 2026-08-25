@@ -5,10 +5,12 @@ from pathlib import Path
 from typing import Annotated, Literal
 
 from fastapi import FastAPI, HTTPException, Query, status
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from pydantic import Field
 
 from case_memory_eval.contracts import ClinicalCase, StrictModel
 from case_memory_eval.evaluator import RuleEvaluator
+from case_memory_eval.ui import CSS, HTML, JS
 from case_memory_eval.workflow import WorkflowConflict, WorkflowNotFound, WorkflowStore
 
 
@@ -41,6 +43,18 @@ def create_app(database_path: Path | str = "case-memory-eval.duckdb") -> FastAPI
 
     def store() -> WorkflowStore:
         return app.state.store  # type: ignore[no-any-return]
+
+    @app.get("/", response_class=HTMLResponse)
+    def reviewer_ui() -> str:
+        return HTML
+
+    @app.get("/assets/styles.css", response_class=PlainTextResponse)
+    def reviewer_styles() -> PlainTextResponse:
+        return PlainTextResponse(CSS, media_type="text/css")
+
+    @app.get("/assets/app.js", response_class=PlainTextResponse)
+    def reviewer_script() -> PlainTextResponse:
+        return PlainTextResponse(JS, media_type="application/javascript")
 
     @app.get("/healthz")
     def health() -> dict[str, str]:
